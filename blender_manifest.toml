@@ -1,0 +1,18 @@
+schema_version = "1.0.0"
+id = "pterrain"
+name = "PTerrain"
+version = "1.0.0"
+tagline = "Real-world progressive terrain"
+maintainer = "Henrik Engström"
+type = "add-on"
+tags = ["Mesh"]
+blender_version_min = "4.2.21"
+license = ["SPDX:GPL-3.0-or-later"]
+website = "https://github.com/henrike586/pterrain"
+copyright = [
+    "2026- Henrik Engström",
+]
+
+[permissions]
+network = "Download DEM & MAP tiles and install Pillow from PyPI"
+files = "Save downloaded tiles in SQLite database and install required Python library files"
