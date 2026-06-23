@@ -15,4 +15,4 @@ copyright = [
 
 [permissions]
 network = "Download DEM & MAP tiles and install Pillow from PyPI"
-files = "Save downloaded tiles in SQLite database and install required Python library files"
+files = "Save downloaded tiles"
