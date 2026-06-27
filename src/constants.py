@@ -24,5 +24,5 @@ PT_DEM_DB_NAME = 'dem_tiles.db'
 PT_MAP_DB_NAME = 'map_tiles.db'
 """Name of the MAP tile database file."""
 
-PT_TILE_DOWNLOAD_BATCH_SIZE = 8
-"""Number of tiles to download simultaneously."""
+PT_TILE_DOWNLOAD_TIMEOUT = 10
+"""Timeout for tile downloads in seconds."""

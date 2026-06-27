@@ -8,44 +8,63 @@
 """
 import os
 import io
+import asyncio
 import sqlite3
 import requests
-import threading
-import concurrent.futures
 from .constants import *
 from .settings import *
 from .pillow_support import import_pillow
 Image = import_pillow()
 
-# Global variables (used in threads)
+# Global variables (used in downloads)
 g_url_header = { 'User-Agent' : f'PTerrain ({PT_VERSION})' }
-g_lock = threading.Lock()
 
 
-def tile_download_thread(url) -> bytes:
+async def _async_fetch_url(url, timeout=10.0):
     """
-    Thread function that downloads a tile from a URL.
+    Asynchronously fetch a single URL using the existing requests client.
 
     Parameters
     ----------
     url : str
-        The URL of the tile to download.
+        URL to download.
+    timeout : float
+        Request timeout in seconds.
 
     Returns
-    -------    
-    bytes        
-        The content of the downloaded tile as bytes. If the download fails, returns a single null byte.
+    -------
+    content : bytes
     """
+    print(url)
+    loop = asyncio.get_running_loop()
+    try:
+        response = await loop.run_in_executor(
+            None,
+            lambda: requests.get(url, headers=g_url_header, timeout=timeout),
+        )
+        return (response.content)
+    except Exception:
+        return b''
 
-    # Execute download
-    res = requests.get(url, headers = g_url_header)            
-    with g_lock:
-        if res.status_code == 200:
-            print('Fetch: ' + url)
-            return res.content
-        else:
-            print('Fail: ' + url)
-            return b'\x00'
+
+async def fetch_urls_async(urls, timeout=10.0):
+    """
+    Download the content of all URLs concurrently.
+
+    Parameters
+    ----------
+    urls : list[str]
+        URLs to download.
+    timeout : float
+        Request timeout in seconds.
+
+    Returns
+    -------
+    list[bytes]
+        A list of downloaded tile contents as bytes.
+    """
+    tasks = [_async_fetch_url(url, timeout) for url in urls]
+    return list(await asyncio.gather(*tasks))
 
 
 class tile_db:
@@ -230,12 +249,10 @@ class tile_db:
             urls.append(self.url_format.format(x = x, y = y, z = z))
 
         # Download in batches
-        with concurrent.futures.ThreadPoolExecutor(PT_TILE_DOWNLOAD_BATCH_SIZE) as executor:
-            res = [executor.submit(tile_download_thread, url) for url in urls]
-            concurrent.futures.wait(res)
+        res = asyncio.run(fetch_urls_async(urls, timeout=PT_TILE_DOWNLOAD_TIMEOUT))
 
         # Process result
         res_iter = iter(res)
         for tile in uncached:
             key = self.get_key(*tile)
-            self.insert_tile(key, next(res_iter)._result)
+            self.insert_tile(key, next(res_iter))
