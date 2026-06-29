@@ -9,7 +9,7 @@
 import os
 from .presets import *
 
-PT_VERSION = '1.0.0'
+PT_VERSION = '1.0.1'
 
 PT_WORK_DIR = os.path.join(os.path.expanduser('~'), '.pterrain')
 if not os.path.exists(PT_WORK_DIR):

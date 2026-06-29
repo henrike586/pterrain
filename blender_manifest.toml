@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 id = "pterrain"
 name = "PTerrain"
-version = "1.0.0"
+version = "1.0.1"
 tagline = "Real-world progressive terrain"
 maintainer = "Henrik Engström"
 type = "add-on"
