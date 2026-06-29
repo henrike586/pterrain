@@ -13,8 +13,7 @@ import sqlite3
 import requests
 from .constants import *
 from .settings import *
-from .pillow_support import import_pillow
-Image = import_pillow()
+from PIL import Image
 
 # Global variables (used in downloads)
 g_url_header = { 'User-Agent' : f'PTerrain ({PT_VERSION})' }

@@ -10,8 +10,7 @@ from .constants import *
 from .tile_db import tile_db
 from . import layer_arithmetics as ptl
 import numpy as np
-from .pillow_support import import_pillow
-Image = import_pillow()
+from PIL import Image
 
 class dem_cache:
     """

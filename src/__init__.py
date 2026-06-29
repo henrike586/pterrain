@@ -7,5 +7,4 @@
 
 """
 from .settings import *
-from .pillow_support import Image, import_pillow
 
