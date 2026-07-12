@@ -6,8 +6,8 @@
     UV coordinate calculation for DEM layers based on MAP layers.
 
 """
+from . import dem_layer
 
-# Gets U/V/map layer from MAP layers
 class map_uv_lookup:
     """
     Class for looking up UV coordinates for DEM vertices based on MAP layers.
@@ -110,3 +110,52 @@ class map_uv_lookup:
         """
         (_, layer) = self.layers[z]
         return layer.get_uv(x, y)
+
+
+def uv_calc(dlayer : dem_layer, map_layers : list) -> tuple:
+    """
+    Function that calculates UV coordinates for a DEM layer based on MAP layers.
+
+    Parameters
+    ----------
+    dlayer : dem_layer
+        The DEM layer for which to calculate UV coordinates.
+    map_layers : list
+        A list of map_layer objects used for UV calculation. 
+
+    Returns
+    -------    
+    tuple[mat_indexes, uv_loops]
+
+    mat_indexes : list
+        A list of material indexes for each face in the DEM layer.
+    uv_loops : list       
+        A list of UV coordinates for each loop in the DEM layer faces.
+    """
+
+    # Setup UV lookup and allocate UV and material index arrays
+    uv_lookup = map_uv_lookup(map_layers)
+    uv_loops = [0] * len(dlayer.faces) * 3  # Triangles, 3 UVs per face
+    mat_indexes = [0] * len(dlayer.faces)
+
+    # Loop over faces in DEM layer
+    i = 0; mat_idx = 0; uv_idx = 0
+    for face in dlayer.faces:
+        # First find common zoom level - the lowest zoom level that covers all vertices of the face
+        common_zoom = 1000
+        for vert_index in face:
+            (x, y, e) = dlayer.verts[vert_index]
+            layer_zoom = uv_lookup.get_layer_zoom(x, y)
+            if layer_zoom < common_zoom:
+                common_zoom = layer_zoom
+        mat_indexes[mat_idx] = common_zoom
+        mat_idx += 1
+
+        # Then calculate UVs for the common zoom level 
+        for vert_index in face:
+            (x, y, e) = dlayer.verts[vert_index]
+            uv = uv_lookup.get_uv(x, y, common_zoom)
+            uv_loops[uv_idx] = uv
+            uv_idx += 1
+
+    return(mat_indexes, uv_loops)   

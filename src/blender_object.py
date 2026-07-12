@@ -9,65 +9,10 @@
 import bpy
 import bmesh
 import numpy as np
-import threading
-import concurrent.futures
 from .settings import *
 from .dem_layer import *
 from .map_layer import *
-from .map_uv import map_uv_lookup
-
-# Global variables (used in threads)
-g_lock = threading.Lock()
-
-
-def uv_thread(dlayer : dem_layer, map_layers : list) -> tuple:
-    """
-    Thread function that calculates UV coordinates for a DEM layer based on MAP layers.
-
-    Parameters
-    ----------
-    dlayer : dem_layer
-        The DEM layer for which to calculate UV coordinates.
-    map_layers : list
-        A list of map_layer objects used for UV calculation. 
-
-    Returns
-    -------    
-    tuple[mat_indexes, uv_loops]
-
-    mat_indexes : list
-        A list of material indexes for each face in the DEM layer.
-    uv_loops : list       
-        A list of UV coordinates for each loop in the DEM layer faces.
-    """
-
-    # Setup UV lookup and allocate UV and material index arrays
-    uv_lookup = map_uv_lookup(map_layers)
-    uv_loops = [0] * len(dlayer.faces) * 3  # Triangles, 3 UVs per face
-    mat_indexes = [0] * len(dlayer.faces)
-
-    # Loop over faces in DEM layer
-    i = 0; mat_idx = 0; uv_idx = 0
-    for face in dlayer.faces:
-        # First find common zoom level - the lowest zoom level that covers all vertices of the face
-        common_zoom = 1000
-        for vert_index in face:
-            (x, y, e) = dlayer.verts[vert_index]
-            layer_zoom = uv_lookup.get_layer_zoom(x, y)
-            if layer_zoom < common_zoom:
-                common_zoom = layer_zoom
-        mat_indexes[mat_idx] = common_zoom
-        mat_idx += 1
-
-        # Then calculate UVs for the common zoom level 
-        for vert_index in face:
-            (x, y, e) = dlayer.verts[vert_index]
-            uv = uv_lookup.get_uv(x, y, common_zoom)
-            uv_loops[uv_idx] = uv
-            uv_idx += 1
-
-    return(mat_indexes, uv_loops)   
-
+from .map_uv import map_uv_lookup, uv_calc
 
 def build_blender_object(dem_layers : list, map_layers : list, proj : any, status_callback : callable) -> None:
     """
@@ -114,10 +59,11 @@ def build_blender_object(dem_layers : list, map_layers : list, proj : any, statu
     bpy.ops.image.save_all_modified()
 
     # Precalcluate UVs (multithreaded)
-    status_callback('UV layers')
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        uv_data = [executor.submit(uv_thread, dlayer, map_layers) for (z, dlayer) in dem_layers]
-        concurrent.futures.wait(uv_data)
+    uv_data = []
+    for i in range(len(dem_layers)):
+        z, dlayer = dem_layers[i]
+        status_callback(f'UV layer {i + 1}/{len(dem_layers)}')
+        uv_data.append(uv_calc(dlayer, map_layers))
     
     # Create mesh object per layer
     layer_objects = []
@@ -144,7 +90,7 @@ def build_blender_object(dem_layers : list, map_layers : list, proj : any, statu
         bm.verts.ensure_lookup_table()
 
         # Create mesh faces
-        (mat_indexes, uv_loops) = uv_data[i]._result
+        (mat_indexes, uv_loops) = uv_data[i]
         mat_iter = iter(mat_indexes)
         uv_iter = iter(uv_loops)
         for f in dlayer.faces:
