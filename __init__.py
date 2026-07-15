@@ -131,7 +131,7 @@ def generate() -> None:
 
     # Check if allowed to access the internet for tile fetching
     if not bpy.app.online_access:
-        show_error_dialog('Online access is disabled. Please enable it to use PTerrain.')
+        show_error_dialog('Online access is disabled. Please enable it to use PTerrain.\nYou can enable it in Edit > Preferences > System > Allow Online Access.')
         return
 
     # Parse center position
