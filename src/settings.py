@@ -7,13 +7,14 @@
 
 """
 import os
+import bpy
 from .presets import *
+from .. import __package__ as base_package
 
 PT_VERSION = '1.0.2'
 
-PT_WORK_DIR = os.path.join(os.path.expanduser('~'), '.pterrain')
-if not os.path.exists(PT_WORK_DIR):
-    os.mkdir(PT_WORK_DIR)
+PT_WORK_DIR = bpy.utils.extension_path_user(base_package, path='', create=True)
+print(f'PT_WORK_DIR = {PT_WORK_DIR}')
 
 PT_SETTINGS = {
     'grid_center_x' : 0x80000000,
@@ -24,4 +25,3 @@ PT_SETTINGS = {
     'map_preset' : PT_MAP_PRESETS[0],
     'clamp_to_sea_level' : False
 }
-

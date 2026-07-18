@@ -14,7 +14,7 @@ The map data is downloaded as 256x256 JPEG tiles from Google. The RGB values are
 The URLs used to download the data are available as settings under the preferences for the add-on. They can be changed to use other sources, as long as the tile format exactly match the current format.
 
 ## Data caching
-The downloaded data tiles are stored in a local database cache under the directory '.pterrain' in the users home directory. This significanly speed-up the generation if the same data needs to be accessed again. The tiles are saved in compressed format, so they do not occupy a significant amount of disk space. It is safe to delete the cache at any point if needed.
+The downloaded data tiles are stored in a local database cache in a Blender user directory. This significanly speed-up the generation if the same data needs to be accessed again. The tiles are saved in compressed format, so they do not occupy a significant amount of disk space. It is safe to delete the cache at any point if needed.
 
 ---
 
