@@ -177,8 +177,8 @@ def generate() -> None:
     settings.PT_SETTINGS['clamp_to_sea_level'] = props.clamp_sea_level
 
     # Build DEM and MAP layers, and generate the Blender object
-    dem_tile_url = bpy.context.preferences.addons[__name__].preferences.dem_tile_url
-    map_tile_url = bpy.context.preferences.addons[__name__].preferences.map_tile_url
+    dem_tile_url = bpy.context.preferences.addons[__package__].preferences.dem_tile_url
+    map_tile_url = bpy.context.preferences.addons[__package__].preferences.map_tile_url
     dem_layers = dem_layer.build_dems(dem_tile_url, update_g_viewport_message)
     map_layers = map_layer.build_maps(map_tile_url, update_g_viewport_message)
     if(props.snap_center_z):
@@ -327,7 +327,7 @@ class PTerrainAddonPreferences(bpy.types.AddonPreferences):
     """
     Addon preferences for PTerrain.
     """
-    bl_idname = __name__
+    bl_idname = __package__
 
     dem_tile_url: bpy.props.StringProperty(
         name='DEM URL',
