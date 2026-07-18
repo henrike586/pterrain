@@ -11,7 +11,7 @@ import bpy
 from .presets import *
 from .. import __package__ as base_package
 
-PT_VERSION = '1.0.2'
+PT_VERSION = '1.0.3'
 
 PT_WORK_DIR = bpy.utils.extension_path_user(base_package, path='', create=True)
 print(f'PT_WORK_DIR = {PT_WORK_DIR}')
