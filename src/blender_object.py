@@ -132,10 +132,11 @@ def build_blender_object(dem_layers : list, map_layers : list, proj : any, statu
     status_callback('Cleaning duplicated vertices')
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.5)
 
-    # Set smooth shading
+    # Set smooth shading and flip normals
     status_callback('Setting smooth shading')
     for face in bm.faces:
         face.smooth = True
+        face.normal_flip()
 
     # Recreate mesh for target object
     bm.to_mesh(target_object.data)
