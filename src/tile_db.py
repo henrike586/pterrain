@@ -41,7 +41,10 @@ async def _async_fetch_url(url, timeout=10.0):
             None,
             lambda: requests.get(url, headers=g_url_header, timeout=timeout),
         )
-        return (response.content)
+        if response.status_code == 200:
+            return (response.content)
+        else:
+            return b''
     except Exception:
         return b''
 
@@ -97,7 +100,7 @@ class tile_db:
         self.db.close()
 
 
-    def unpack(self, blob : bytes) -> Image.Image:
+    def unpack(self, blob : bytes) -> Image.Image | None:
         """
         Unpacks a tile blob and returns it as a PIL Image.
 
@@ -111,8 +114,11 @@ class tile_db:
         Image.Image
             A PIL Image object.
         """
-        image = Image.open(io.BytesIO(blob))
-        return image
+        try:
+            return Image.open(io.BytesIO(blob))
+        except Exception as e:
+            print(f"Failed to unpack tile blob: {e}")
+            return None
 
 
     def get_key(self, x : int, y : int, z : int) -> str:
