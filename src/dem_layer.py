@@ -11,6 +11,8 @@ from .settings import *
 from .dem_cache import dem_cache
 from .tile_db import tile_db
 from . import layer_arithmetics as ptl
+import numpy as np
+import math
 
 class init_dem_layer:
     """
@@ -137,6 +139,75 @@ class dem_layer:
         self.dcache.preload_tiles(self.get_tiles())
 
 
+    def filter_tiles(self, threshold : float = 1.0, median_size : int = 5) -> None:
+        """
+        Filters the tiles to remove erraneous 'spikes' in the DEM data.
+        If a value differs from the median of its neighborhood by more than the threshold,
+        it is replaced with the median value.
+
+        Parameters
+        ----------
+        threshold : float, optional
+            Threshold for detecting spikes, in relative grid units. Default is 1.0.
+        median_size : int, optional
+            Side length of the median filter neighborhood. Must be odd and >= 3.
+        """
+        if median_size < 3 or median_size % 2 == 0:
+            raise ValueError('median_size must be an odd integer >= 3')
+
+        # Convert the threshold from relative grid units to meters
+        threshold *= ptl.lon_res(self.z + PT_DEM_TILE_RES_LOG2) # To meters
+
+        # Merge all tiles in the current layer into one rectangular array,
+        # filter the interior once, and then write the result back into each tile.
+        tiles = list(self.get_tiles())
+        if not tiles:
+            return
+
+        # Setup the merged array dimensions based on the tile extents
+        txs = [tx for tx, ty, z in tiles]
+        tys = [ty for tx, ty, z in tiles]
+        min_tx = min(txs)
+        max_tx = max(txs)
+        min_ty = min(tys)
+        max_ty = max(tys)
+        tile_cols = max_tx - min_tx + 1
+        tile_rows = max_ty - min_ty + 1
+        merged = np.zeros((tile_rows * PT_DEM_TILE_RES, tile_cols * PT_DEM_TILE_RES), dtype=np.float32)
+
+        # Merge all tiles into a single array for filtering
+        tile_map = {}
+        for tx, ty, z in tiles:
+            dem = self.dcache.get_tile(tx, ty, z)
+            r0 = (ty - min_ty) * PT_DEM_TILE_RES
+            r1 = r0 + PT_DEM_TILE_RES
+            c0 = (tx - min_tx) * PT_DEM_TILE_RES
+            c1 = c0 + PT_DEM_TILE_RES
+            merged[r0:r1, c0:c1] = dem
+            tile_map[(tx, ty, z)] = (r0, r1, c0, c1)
+
+        # Filter the merged array using a median filter
+        pad = median_size // 2
+        interior = merged[pad:-pad, pad:-pad]
+        windows = np.lib.stride_tricks.sliding_window_view(merged, (median_size, median_size))
+        median_interior = np.median(windows, axis=(-2, -1)).astype(merged.dtype)
+
+        # Smooth the interior using a same-size averaging kernel
+        kernel = np.ones((median_size, median_size), dtype=np.float32) / (median_size * median_size)
+        smoothed_interior = np.sum(windows * kernel, axis=(-2, -1)).astype(merged.dtype)
+
+        # Replace the interior with the smoothed values where the difference exceeds the threshold
+        diff = np.abs(median_interior - interior)
+        merged[pad:-pad, pad:-pad] = np.where(diff >= threshold, smoothed_interior, interior)
+
+        # Restore the filtered data back into the individual tiles
+        for tx, ty, z in tiles:
+            if (tx, ty, z) not in tile_map:
+                continue
+            r0, r1, c0, c1 = tile_map[(tx, ty, z)]
+            self.dcache.set_tile(tx, ty, z, merged[r0:r1, c0:c1].copy())
+
+
     def add_vertex(self, x : int, y : int, z : int) -> int:
         """
         Adds a new vertex to the grid and returns its index. If the vertex already exists, returns the existing index.
@@ -184,6 +255,10 @@ class dem_layer:
 
         # Preload tiles
         self.preload_tiles()
+
+        # Filter tiles
+        if PT_SETTINGS['dem_filter_spikes']:
+            self.filter_tiles()
 
         # Generate grid faces
         self.verts = []

@@ -101,3 +101,50 @@ class dem_cache:
         # Get position within tile and extract elevation
         sx, sy = ptl.tile_sub(x, y, z, PT_DEM_TILE_RES_LOG2)
         return dem[sy][sx]
+
+    def get_tile(self, tx : int, ty : int, z : int) -> np.array:
+        """
+        Gets the DEM tile for the given tile coordinates.
+
+        Parameters
+        ----------
+        tx : int
+            The x-coordinate of the tile.
+        ty : int
+            The y-coordinate of the tile.
+        z : int
+            The zoom level.
+
+        Returns
+        -------
+        np.array
+            A 2D array of elevation values for the tile.
+        """
+        key = f'{tx}:{ty}:{z}'
+        dem = self.dems.get(key)
+        if dem is None:
+            tile = self.db.get_tile(tx, ty, z)
+            if tile is None:
+                return np.zeros((PT_DEM_TILE_RES, PT_DEM_TILE_RES), dtype=np.float32)
+            dem = self.unpack_dem(tile)
+            self.dems[key] = dem
+        return dem
+
+
+    def set_tile(self, tx : int, ty : int, z : int, dem : np.array) -> None:
+        """
+        Replaces a cached DEM tile.
+
+        Parameters
+        ----------
+        tx : int
+            The x-coordinate of the tile.
+        ty : int
+            The y-coordinate of the tile.
+        z : int
+            The zoom level.
+        dem : np.array
+            The replacement DEM array.
+        """
+        key = f'{tx}:{ty}:{z}'
+        self.dems[key] = dem

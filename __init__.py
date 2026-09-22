@@ -176,6 +176,9 @@ def generate() -> None:
     # Set clamp to sea level setting
     settings.PT_SETTINGS['clamp_to_sea_level'] = props.clamp_sea_level
 
+    # Set DEM filter spikes setting
+    settings.PT_SETTINGS['dem_filter_spikes'] = props.dem_filter_spikes
+
     # Build DEM and MAP layers, and generate the Blender object
     dem_tile_url = bpy.context.preferences.addons[__package__].preferences.dem_tile_url
     map_tile_url = bpy.context.preferences.addons[__package__].preferences.map_tile_url
@@ -265,6 +268,12 @@ class PTerrainProperties(bpy.types.PropertyGroup):
         default=False
     )
 
+    dem_filter_spikes: bpy.props.BoolProperty(
+        name='Suppress DEM spikes',
+        description='Apply thresholded median filter to DEM data to remove spikes.',
+        default=True
+    )
+
 
 class PTerrainGenerateOperator(bpy.types.Operator):
     """
@@ -320,6 +329,7 @@ class PTerrainPanel(bpy.types.Panel):
         layout.prop(props, 'recenter')
         layout.prop(props, 'adjust_view')
         layout.prop(props, 'clamp_sea_level')
+        layout.prop(props, 'dem_filter_spikes')
         layout.operator(PTerrainGenerateOperator.bl_idname, text='Generate')
 
 

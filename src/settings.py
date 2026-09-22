@@ -23,5 +23,6 @@ PT_SETTINGS = {
     'proj_center_y' : 0x80000000,
     'dem_preset' : PT_DEM_PRESETS[0],
     'map_preset' : PT_MAP_PRESETS[0],
-    'clamp_to_sea_level' : False
+    'clamp_to_sea_level' : False,
+    'dem_filter_spikes' : True
 }

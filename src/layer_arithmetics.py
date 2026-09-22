@@ -15,6 +15,10 @@
 
 """
 
+import math
+from .constants import *
+
+
 def valid_y(y : int) -> bool:
     """
     Checks if a given y-coordinate is valid.
@@ -173,3 +177,18 @@ def tile_sub(x : int, y : int, z : int, tile_res_log2 : int) -> tuple[int, int]:
     sy = shift(z + tile_res_log2, y)
     return sx & 0xff, sy & 0xff
 
+def lon_res(z : int) -> float:
+    """
+    Calculates the longitudinal resolution for a given zoom level.
+
+    Parameters
+    ----------
+    z : int
+        The zoom level.
+
+    Returns
+    -------
+    float
+        The longitudinal resolution.
+    """
+    return 2.0 * math.pi * PT_EARTH_RADIUS * float(lsb(z)) / float(1 << 32)

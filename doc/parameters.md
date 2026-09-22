@@ -41,6 +41,9 @@ The default viewport clipping (0.01m / 1000m) is too restricted to view the gene
 ### Clamp elevation to sea level
 If this setting is checked, all data points with an elevation below zero is clamped to zero. The elevation data in water regions sometimes represents the sea bottom - use this setting to get a flat sea surface.
 
+### Suppress DEM spikes
+The DEM data tiles are sometimes contaminated by 'spikes' in elevation. This filter suppresses the spikes by a thresholded median filter. It should have very minor effect on normal DEM data - only extremely steep slopes might be affected (smoothed).
+
 ### Generate
 Press the button to start generation of the terrain mesh using the current settings.
 
