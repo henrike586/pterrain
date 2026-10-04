@@ -28,6 +28,11 @@ PT_DEM_PRESETS = [
         'name' : 'High',
         'grid_size' : 512,
         'z_layers' : range(15, 4-1, -1)
+    },
+    {
+        'name' : 'Ultra',
+        'grid_size' : 1024,
+        'z_layers' : range(15, 5-1, -1)
     }
 ]
 

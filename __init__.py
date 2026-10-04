@@ -157,6 +157,8 @@ def generate() -> None:
         settings.PT_SETTINGS['dem_preset'] = presets.PT_DEM_PRESETS[1]
     elif(props.dem_resolution == 'HIGH'):
             settings.PT_SETTINGS['dem_preset'] = presets.PT_DEM_PRESETS[2]
+    elif(props.dem_resolution == 'ULTRA'):
+        settings.PT_SETTINGS['dem_preset'] = presets.PT_DEM_PRESETS[3]
 
     if(props.map_resolution == 'LOW'):
         settings.PT_SETTINGS['map_preset'] = presets.PT_MAP_PRESETS[0]
@@ -218,6 +220,7 @@ class PTerrainProperties(bpy.types.PropertyGroup):
             ('LOW', 'Low', 'Low DEM resolution'),
             ('MEDIUM', 'Medium', 'Medium DEM resolution'),
             ('HIGH', 'High', 'High DEM resolution'),
+            ('ULTRA', 'Ultra', 'Ultra DEM resolution'),
         ],
         default='LOW'
     )
