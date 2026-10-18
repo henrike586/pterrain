@@ -37,10 +37,12 @@ def build_blender_object(dem_layers : list, map_layers : list, proj : any, statu
     for (z, mlayer) in map_layers:
 
         # Convert Pillow image to Blender image
-        pixels = np.asarray(mlayer.image, dtype=np.float32) / 255.0
-        pixels = np.concatenate((pixels, np.ones((w, w, 1), dtype=np.float32)), axis=2)
+        rgb = np.asarray(mlayer.image)
+        pixels = np.empty((w, w, 4), dtype=np.float32)
+        np.multiply(rgb, 1.0 / 255.0, out=pixels[:, :, :3], casting='unsafe')
+        pixels[:, :, 3] = 1.0
         image = bpy.data.images.new(f'pt_image_z{z:02d}', width=w, height=w)
-        image.pixels.foreach_set(pixels.flatten())
+        image.pixels.foreach_set(pixels.ravel())        
 
         # Create and link material shader
         material = bpy.data.materials.new(f'pt_material_z{z:02d}')
