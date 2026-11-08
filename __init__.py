@@ -324,10 +324,18 @@ class PTerrainPanel(bpy.types.Panel):
         layout = self.layout
         props = context.scene.pterrain_props
 
-        layout.prop(props, 'position')
-        layout.prop(props, 'dem_resolution')
-        layout.prop(props, 'map_resolution')
-        layout.prop(props, 'projection')
+        split = layout.split(factor=0.18)
+        split.column().label(text='Lat, lon')
+        split.column().prop(props, 'position', text='')
+        split = layout.split(factor=0.38)
+        split.column().label(text='DEM resolution')
+        split.column().prop(props, 'dem_resolution', text='')
+        split = layout.split(factor=0.38)
+        split.column().label(text='MAP resolution')
+        split.column().prop(props, 'map_resolution', text='')
+        split = layout.split(factor=0.25)
+        split.column().label(text='Projection')
+        split.column().prop(props, 'projection', text='')
         layout.prop(props, 'snap_center_z')
         layout.prop(props, 'recenter')
         layout.prop(props, 'adjust_view')
@@ -394,4 +402,3 @@ def unregister() -> None:
     del bpy.types.Scene.pterrain_props
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
-
