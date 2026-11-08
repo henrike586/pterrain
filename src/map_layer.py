@@ -188,7 +188,7 @@ def build_maps(map_tile_url : str, status_callback : callable) -> list:
 
     # Build MAP layers from top to bottom
     layers = []
-    z_layers = PT_SETTINGS['map_preset']['z_layers']
+    z_layers = [z for z in PT_SETTINGS['map_preset']['z_layers'] if z <= PT_SETTINGS['map_max_z']]
     prev_layer = init_map_layer(z_layers[0], PT_SETTINGS['map_preset']['texture_size'])
     for i in range(len(z_layers)):
         z = z_layers[i]

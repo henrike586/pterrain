@@ -24,5 +24,7 @@ PT_SETTINGS = {
     'dem_preset' : PT_DEM_PRESETS[0],
     'map_preset' : PT_MAP_PRESETS[0],
     'clamp_to_sea_level' : False,
-    'dem_filter_spikes' : True
+    'dem_filter_spikes' : True,
+    'dem_max_z' : 15,
+    'map_max_z' : 20
 }

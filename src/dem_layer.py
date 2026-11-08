@@ -359,7 +359,7 @@ def build_dems(dem_tile_url : str, status_callback : callable) -> list:
 
     # Build DEM layers from bottom to top
     layers = []
-    z_layers = PT_SETTINGS['dem_preset']['z_layers']
+    z_layers = [z for z in PT_SETTINGS['dem_preset']['z_layers'] if z <= PT_SETTINGS['dem_max_z']]
     prev_layer = init_dem_layer()
     for i in range(len(z_layers)):
         z = z_layers[i]
@@ -371,5 +371,4 @@ def build_dems(dem_tile_url : str, status_callback : callable) -> list:
 
     ddb.close()
     return layers
-
 

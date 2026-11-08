@@ -181,6 +181,10 @@ def generate() -> None:
     # Set DEM filter spikes setting
     settings.PT_SETTINGS['dem_filter_spikes'] = props.dem_filter_spikes
 
+    # Set maximum DEM and MAP zoom levels
+    settings.PT_SETTINGS['dem_max_z'] = int(props.dem_max_z)
+    settings.PT_SETTINGS['map_max_z'] = int(props.map_max_z)
+
     # Build DEM and MAP layers, and generate the Blender object
     dem_tile_url = bpy.context.preferences.addons[__package__].preferences.dem_tile_url
     map_tile_url = bpy.context.preferences.addons[__package__].preferences.map_tile_url
@@ -214,7 +218,7 @@ class PTerrainProperties(bpy.types.PropertyGroup):
     )
 
     dem_resolution: bpy.props.EnumProperty(
-        name='DEM resolution',
+        name='DEM preset',
         description='DEM resolution for generated terrain.',
         items=[
             ('LOW', 'Low', 'Low DEM resolution'),
@@ -226,7 +230,7 @@ class PTerrainProperties(bpy.types.PropertyGroup):
     )
 
     map_resolution: bpy.props.EnumProperty(
-        name='MAP resolution',
+        name='MAP preset',
         description='MAP resolution for generated terrain.',
         items=[
             ('LOW', 'Low', 'Low MAP resolution'),
@@ -275,6 +279,43 @@ class PTerrainProperties(bpy.types.PropertyGroup):
         name='Suppress DEM spikes',
         description='Apply thresholded median filter to DEM data to remove spikes.',
         default=True
+    )
+
+    dem_max_z: bpy.props.EnumProperty(
+        name='DEM max res',
+        description='Finest DEM resolution to generate.',
+        items=[
+            ('15', '5x5m', 'Zoom level 15'),
+            ('14', '10x10m', 'Zoom level 14'),
+            ('13', '20x20m', 'Zoom level 13'),
+            ('12', '40x40m', 'Zoom level 12'),
+            ('11', '75x75m', 'Zoom level 11'),
+            ('10', '150x150m', 'Zoom level 10'),
+            ('9', '300x300m', 'Zoom level 9'),
+            ('8', '600x600m', 'Zoom level 8'),
+        ],
+        default='15'
+    )
+
+    map_max_z: bpy.props.EnumProperty(
+        name='MAP max res',
+        description='Finest MAP resolution to generate.',
+        items=[
+            ('20', '0.15x0.15m', 'Zoom level 20'),
+            ('19', '0.3x0.3m', 'Zoom level 19'),
+            ('18', '0.6x0.6m', 'Zoom level 18'),
+            ('17', '1.2x1.2m', 'Zoom level 17'),
+            ('16', '2.5x2.5m', 'Zoom level 16'),
+            ('15', '5x5m', 'Zoom level 15'),
+            ('14', '10x10m', 'Zoom level 14'),
+            ('13', '20x20m', 'Zoom level 13'),
+            ('12', '40x40m', 'Zoom level 12'),
+            ('11', '75x75m', 'Zoom level 11'),
+            ('10', '150x150m', 'Zoom level 10'),
+            ('9', '300x300m', 'Zoom level 9'),
+            ('8', '600x600m', 'Zoom level 8'),
+        ],
+        default='20'
     )
 
 
@@ -327,20 +368,37 @@ class PTerrainPanel(bpy.types.Panel):
         split = layout.split(factor=0.18)
         split.column().label(text='Lat, lon')
         split.column().prop(props, 'position', text='')
-        split = layout.split(factor=0.38)
-        split.column().label(text='DEM resolution')
+        split = layout.split(factor=0.29)
+        split.column().label(text='DEM preset')
         split.column().prop(props, 'dem_resolution', text='')
-        split = layout.split(factor=0.38)
-        split.column().label(text='MAP resolution')
+        split = layout.split(factor=0.29)
+        split.column().label(text='MAP preset')
         split.column().prop(props, 'map_resolution', text='')
         split = layout.split(factor=0.25)
         split.column().label(text='Projection')
         split.column().prop(props, 'projection', text='')
-        layout.prop(props, 'snap_center_z')
-        layout.prop(props, 'recenter')
-        layout.prop(props, 'adjust_view')
-        layout.prop(props, 'clamp_sea_level')
-        layout.prop(props, 'dem_filter_spikes')
+
+        basic_box = layout.box()
+        basic_box.label(text='Basic settings')
+        basic_box.prop(props, 'snap_center_z')
+        basic_box.prop(props, 'recenter')
+        basic_box.prop(props, 'adjust_view')
+        basic_box.prop(props, 'clamp_sea_level')
+        basic_box.prop(props, 'dem_filter_spikes')
+
+        advanced_header, advanced_body = layout.panel(
+            'pterrain_advanced_settings',
+            default_closed=True
+        )
+        advanced_header.label(text='Advanced settings')
+        if advanced_body is not None:
+            split = advanced_body.split(factor=0.50)
+            split.column().label(text='DEM max resolution')
+            split.column().prop(props, 'dem_max_z', text='')
+            split = advanced_body.split(factor=0.50)
+            split.column().label(text='MAP max resolution')
+            split.column().prop(props, 'map_max_z', text='')
+
         layout.operator(PTerrainGenerateOperator.bl_idname, text='Generate')
 
 
