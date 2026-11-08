@@ -7,8 +7,8 @@
 ### Lat, lon
 The center point of the generated terrain in latitude/longitude. Use a comma to separate the two values. Enter a known position, or use the Google Maps-method described in [Basic usage](../README.md#basic-usage).
 
-### DEM and MAP resolution
-Select from three different resolution (quality) presets; Low / Medium / High. Selecting a higher preset will increase file sizes and generation times, see [Performance](./performance.md). It is recommended to start with a low preset, and the increase if needed. The DEM/MAP resolution presets can be selected independently.
+### DEM and MAP presets
+Select from different resolution (quality) presets; Low / Medium / High / Ultra (only DEM). Selecting a higher preset will increase file sizes and generation times, see [Performance](./performance.md). It is recommended to start with a low preset, and the increase if needed. The DEM/MAP resolution presets can be selected independently.
 
 ### Projection
 #### Geocentric
@@ -43,6 +43,9 @@ If this setting is checked, all data points with an elevation below zero is clam
 
 ### Suppress DEM spikes
 The DEM data tiles are sometimes contaminated by 'spikes' in elevation. This filter suppresses the spikes by a thresholded median filter. It should have very minor effect on normal DEM data - only extremely steep slopes might be affected (smoothed).
+
+### DEM/MAP max resolution (Advanced setting)
+The DEM/MAP presets selects the highest resolution in the centre by default. These settings override the centre resolution. It is only possible to select a lower centre resolution.
 
 ### Generate
 Press the button to start generation of the terrain mesh using the current settings.
