@@ -47,13 +47,19 @@ def build_blender_object(dem_layers : list, map_layers : list, proj : any, statu
         # Create and link material shader
         material = bpy.data.materials.new(f'pt_material_z{z:02d}')
         material.use_nodes = True
-        mshader = material.node_tree.nodes['Principled BSDF']
-        mshader.inputs['Roughness'].default_value = 1.0
+        mshader = next(
+            node for node in material.node_tree.nodes
+            if node.bl_idname == 'ShaderNodeBsdfPrincipled'
+        )
+        roughness = next(socket for socket in mshader.inputs if socket.identifier == 'Roughness')
+        roughness.default_value = 1.0
         texture = material.node_tree.nodes.new('ShaderNodeTexImage')
         texture.image = image
         texture.location.x -= 600
         texture.location.y += 100
-        material.node_tree.links.new(mshader.inputs['Base Color'], texture.outputs['Color'])
+        base_color = next(socket for socket in mshader.inputs if socket.identifier == 'Base Color')
+        color = next(socket for socket in texture.outputs if socket.identifier == 'Color')
+        material.node_tree.links.new(base_color, color)
         materials.append(material)
 
     # Save all images in file
