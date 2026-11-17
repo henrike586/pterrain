@@ -55,6 +55,7 @@ def build_blender_object(dem_layers : list, map_layers : list, proj : any, statu
         roughness.default_value = 1.0
         texture = material.node_tree.nodes.new('ShaderNodeTexImage')
         texture.image = image
+        texture.extension = 'MIRROR'
         texture.location.x -= 600
         texture.location.y += 100
         base_color = next(socket for socket in mshader.inputs if socket.identifier == 'Base Color')
